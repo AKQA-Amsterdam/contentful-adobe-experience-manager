@@ -1,5 +1,5 @@
 {
-  "name": "contentful-adobe-dam",
+  "name": "contentful-aem",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
