@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
-import { Heading, Form, Workbench, Paragraph } from '@contentful/forma-36-react-components';
+import {
+  Heading,
+  Form,
+  Workbench,
+  Paragraph,
+} from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 
 export interface AppInstallationParameters {}
@@ -27,13 +32,17 @@ export default class Config extends Component<ConfigProps, ConfigState> {
   async componentDidMount() {
     // Get current parameters of the app.
     // If the app is not installed yet, `parameters` will be `null`.
-    const parameters: AppInstallationParameters | null = await this.props.sdk.app.getParameters();
+    const { sdk } = this.props;
+    const parameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
-    this.setState(parameters ? { parameters } : this.state, () => {
-      // Once preparation has finished, call `setReady` to hide
-      // the loading screen and present the app to a user.
-      this.props.sdk.app.setReady();
-    });
+    this.setState(
+      (state) => (parameters ? { parameters } : state),
+      () => {
+        // Once preparation has finished, call `setReady` to hide
+        // the loading screen and present the app to a user.
+        sdk.app.setReady();
+      }
+    );
   }
 
   onConfigure = async () => {
@@ -43,14 +52,15 @@ export default class Config extends Component<ConfigProps, ConfigState> {
 
     // Get current the state of EditorInterface and other entities
     // related to this app installation
-    const currentState = await this.props.sdk.app.getCurrentState();
+    const { sdk } = this.props;
+    const currentState = await sdk.app.getCurrentState();
 
     return {
       // Parameters to be persisted as the app configuration.
-      parameters: this.state.parameters,
+      parameters: this.state,
       // In case you don't want to submit any update to app
       // locations, you can just pass the currentState as is
-      targetState: currentState
+      targetState: currentState,
     };
   };
 
@@ -59,7 +69,9 @@ export default class Config extends Component<ConfigProps, ConfigState> {
       <Workbench className={css({ margin: '80px' })}>
         <Form>
           <Heading>App Config</Heading>
-          <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
+          <Paragraph>
+            Welcome to your contentful app. This is your config page.
+          </Paragraph>
         </Form>
       </Workbench>
     );
