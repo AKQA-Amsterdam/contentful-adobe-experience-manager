@@ -76,10 +76,6 @@ module.exports = {
         '@typescript-eslint/no-use-before-define': 'warn',
         'no-shadow': 'off',
         '@typescript-eslint/no-shadow': ['error'],
-        // Remove once we start building and actually use everything we need
-        '@typescript-eslint/no-empty-interface': 'warn',
-        'react/no-unused-prop-types': 'warn',
-        'react/no-unused-state': 'warn',
       },
     },
   ],
