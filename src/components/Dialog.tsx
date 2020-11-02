@@ -3,6 +3,7 @@ import {
   EditorToolbar,
   Button,
   Spinner,
+  HelpText,
 } from '@contentful/forma-36-react-components';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { css } from 'emotion';
@@ -82,6 +83,10 @@ const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
           src={iframeUrl}
         />
       </div>
+      <HelpText>
+        If the AEM window is not loading above, please login to it on a new tab
+        and refresh this page.
+      </HelpText>
     </div>
   );
 };
