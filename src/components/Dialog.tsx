@@ -6,7 +6,6 @@ import {
   AppInstallationParameters,
   AppInstanceParameters,
 } from './ConfigScreen';
-import getValidURL from '../utils/getValidUrl';
 
 export enum IframeActions {
   success,
@@ -47,9 +46,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
 
   const iframeUrl = useMemo(
     () =>
-      `${getValidURL(configDomain || '')}/aem/assetpicker.html?mode=${
-        mode || 'single'
-      }`,
+      `https://${configDomain}/aem/assetpicker.html?mode=${mode || 'single'}`,
     [configDomain, mode]
   );
 
