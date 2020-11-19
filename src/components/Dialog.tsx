@@ -1,20 +1,24 @@
-import React, { useMemo } from 'react';
-import {
-  EditorToolbar,
-  Button,
-  Spinner,
-  HelpText,
-} from '@contentful/forma-36-react-components';
+import React, { useMemo, useEffect, useCallback } from 'react';
+import { Spinner, HelpText } from '@contentful/forma-36-react-components';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { css } from 'emotion';
-import { AppInstallationParameters, AssetSelectorMode } from './ConfigScreen';
+import {
+  AppInstallationParameters,
+  AppInstanceParameters,
+} from './ConfigScreen';
+import getValidURL from '../utils/getValidUrl';
+
+export enum IframeActions {
+  success,
+  cancel,
+}
 
 interface DialogProps {
   sdk: DialogExtensionSDK;
 }
 
 const iframeWrapperStyles = css`
-  height: 300px;
+  height: 350px;
   border: 1px solid #c3cfd5;
   overflow: hidden;
   border-bottom-left-radius: 4px;
@@ -29,7 +33,7 @@ const iframeWrapperStyles = css`
 const iframeStyles = css`
   width: 100%;
   border: 0;
-  height: 300px;
+  height: 350px;
 
   position: absolute;
   top: 0;
@@ -37,16 +41,35 @@ const iframeStyles = css`
 `;
 
 const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
-  const { configUrl, mode } = sdk.parameters
+  const { configDomain } = sdk.parameters
     .installation as AppInstallationParameters;
+
+  const { mode } = sdk.parameters.instance as AppInstanceParameters;
+
   const iframeUrl = useMemo(
-    () => `https://${configUrl}/aem/assetpicker.html?mode=${mode}`,
-    [configUrl, mode]
+    () =>
+      `${getValidURL(configDomain || '')}/aem/assetpicker.html?mode=${mode}`,
+    [configDomain, mode]
   );
 
-  const closeDialog = (): void => {
-    sdk.close({ url: iframeUrl });
-  };
+  const listenForMessage = useCallback(
+    (event: MessageEvent): void => {
+      const res = JSON.parse(event.data);
+      if (res.config.action === 'close') {
+        sdk.close({ action: IframeActions.cancel, data: {} });
+      } else {
+        sdk.close({ action: IframeActions.success, data: res.data });
+      }
+    },
+    [sdk]
+  );
+
+  useEffect(() => {
+    window?.addEventListener('message', listenForMessage);
+    return (): void => {
+      window?.removeEventListener('message', listenForMessage);
+    };
+  }, [listenForMessage]);
 
   return (
     <div
@@ -54,27 +77,6 @@ const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
         padding: 20px;
       `}
     >
-      <EditorToolbar
-        className={css`
-          justify-content: flex-end;
-        `}
-      >
-        <Button
-          onClick={closeDialog}
-          size="small"
-          buttonType="muted"
-          className={css`
-            margin-right: 10px;
-          `}
-        >
-          Cancel
-        </Button>
-        <Button onClick={closeDialog} size="small">
-          {mode === AssetSelectorMode.multiple
-            ? 'Select Assets'
-            : 'Select Asset'}
-        </Button>
-      </EditorToolbar>
       <div className={iframeWrapperStyles}>
         <Spinner />
         <iframe
@@ -83,7 +85,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
           src={iframeUrl}
         />
       </div>
-      <HelpText>
+      <HelpText style={{ marginTop: '0.5rem' }}>
         If the AEM window is not loading above, please login to it on a new tab
         and refresh this page.
       </HelpText>

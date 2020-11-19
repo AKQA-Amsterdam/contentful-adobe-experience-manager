@@ -7,8 +7,6 @@ import {
   TextField,
   Paragraph,
   Card,
-  SelectField,
-  Option,
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import validateUrl from '../utils/validateUrl';
@@ -25,7 +23,10 @@ export enum AssetSelectorMode {
 }
 
 export interface AppInstallationParameters {
-  configUrl: string;
+  configDomain: string;
+}
+
+export interface AppInstanceParameters {
   mode: AssetSelectorMode;
 }
 
@@ -35,7 +36,7 @@ export interface ConfigProps {
 
 export interface ConfigState {
   parameters: AppInstallationParameters;
-  validConfigUrl: boolean;
+  validConfigDomain: boolean;
 }
 
 export default class Config extends Component<ConfigProps, ConfigState> {
@@ -43,10 +44,9 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     super(props);
     this.state = {
       parameters: {
-        configUrl: '',
-        mode: AssetSelectorMode.single,
+        configDomain: '',
       },
-      validConfigUrl: true,
+      validConfigDomain: true,
     };
 
     // `onConfigure` allows to configure a callback to be
@@ -64,8 +64,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     this.setState(
       {
         parameters: parameters || {
-          configUrl: '',
-          mode: AssetSelectorMode.single,
+          configDomain: '',
         },
       },
       () => {
@@ -99,45 +98,29 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     };
   };
 
-  updateConfigUrl = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  updateConfigDomain = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newValue = e.target.value;
-    const {
-      parameters: { mode },
-    } = this.state;
+
     this.setState(
       {
         parameters: {
-          configUrl: newValue,
-          mode,
+          configDomain: newValue,
         },
       },
       () => {
         if (!validateUrl(newValue)) {
-          this.setState({ validConfigUrl: false });
+          this.setState({ validConfigDomain: false });
         } else {
-          this.setState({ validConfigUrl: true });
+          this.setState({ validConfigDomain: true });
         }
       }
     );
   };
 
-  updateMode = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const newMode = e.target.value as AssetSelectorMode;
-    const {
-      parameters: { configUrl },
-    } = this.state;
-    this.setState({
-      parameters: {
-        configUrl,
-        mode: AssetSelectorMode[newMode],
-      },
-    });
-  };
-
   render(): React.ReactNode {
     const {
-      parameters: { configUrl, mode },
-      validConfigUrl,
+      parameters: { configDomain },
+      validConfigDomain,
     } = this.state;
     return (
       <>
@@ -160,28 +143,18 @@ export default class Config extends Component<ConfigProps, ConfigState> {
               <hr />
               <Heading>Configuration</Heading>
               <TextField
-                id="configUrl"
-                name="configUrl"
+                id="configDomain"
+                name="configDomain"
                 labelText="AEM domain"
-                helpText="The domain name to interact with the Adobe ExperienceManager. Example: author-danone-stage-64-b62-s3.adobecqms.net"
+                helpText="The domain name to interact with the Adobe ExperienceManager (without https:// at the start and without / at the end). Example: author-anon-stage-00-000-00.adobecqms.net"
                 validationMessage={
-                  (!validConfigUrl && 'Please enter a valid URL') || undefined
+                  (!validConfigDomain && 'Please enter a valid URL') ||
+                  undefined
                 }
-                value={configUrl}
-                onChange={this.updateConfigUrl}
+                value={configDomain}
+                onChange={this.updateConfigDomain}
                 required
               />
-              <SelectField
-                id="mode"
-                name="mode"
-                labelText="Asset selection mode"
-                helpText="Defines if a single or multiple assets can be selected from AEM in a single field"
-                value={mode}
-                onChange={this.updateMode}
-              >
-                <Option value={AssetSelectorMode.single}>Single</Option>
-                <Option value={AssetSelectorMode.multiple}>Multiple</Option>
-              </SelectField>
             </Form>
           </Card>
         </Workbench>

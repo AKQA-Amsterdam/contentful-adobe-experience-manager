@@ -4,19 +4,21 @@ import {
   Asset,
   HelpText,
   Icon,
-  Tooltip,
   Button,
+  EmptyState,
 } from '@contentful/forma-36-react-components';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { css } from 'emotion';
+import { AppInstallationParameters } from './ConfigScreen';
 import aemLogo from '../img/aem-logo.png';
+import { IframeActions } from './Dialog';
 
 const assetStyles = css`
   div {
     width: auto;
   }
   img {
-    height: 100px;
+    height: 50px;
     width: auto;
   }
 `;
@@ -61,6 +63,9 @@ interface FieldProps {
 const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
   const [assets, setAssets] = useState(sdk.field.getValue());
 
+  const { configDomain } = sdk.parameters
+    .installation as AppInstallationParameters;
+
   // Update the persistent value whenever the assets selected change
   useEffect(() => {
     const updateFieldValue = async (): Promise<void> => {
@@ -79,10 +84,24 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
       minHeight: 430,
       allowHeightOverflow: true,
     });
-    if (dialogData) {
-      console.log(dialogData);
+    if (dialogData && dialogData.action === IframeActions.success) {
+      setAssets(dialogData.data);
     }
   }, [sdk]);
+
+  if (!configDomain) {
+    return (
+      <EmptyState
+        descriptionProps={{
+          text:
+            'Please set the AEM Asset Selector domain in the App settings before using this field view',
+        }}
+        headingProps={{
+          text: 'App Configuration incomplete',
+        }}
+      />
+    );
+  }
 
   // If you only want to extend Contentful's default editing experience
   // reuse Contentful's editor components
@@ -91,6 +110,7 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
     <div
       className={css`
         display: flex;
+        height: 100%;
       `}
     >
       {assets?.length && (
@@ -103,21 +123,29 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
         >
           <Card
             className={css`
-              height: 100px;
+              height: 50px;
               display: inline-block;
               padding: 2px;
             `}
           >
-            <Asset src={assets[0].url} title="" className={assetStyles} />
+            <Asset
+              src={assets[0].img || assets[0].url}
+              title=""
+              className={assetStyles}
+            />
           </Card>
           <div>
             {assets.length > 1 && (
               <HelpText>+ {assets.length - 1} more assets</HelpText>
             )}
-            <button onClick={clearAssets} className={roundButtonStyles}>
-              <Tooltip content="Clear Assets" isVisible={false} place="right">
+            <button
+              onClick={clearAssets}
+              className={roundButtonStyles}
+              title="Clear Assets"
+            >
+              <span>
                 <Icon icon="Close" size="small" />
-              </Tooltip>
+              </span>
             </button>
           </div>
         </div>
@@ -152,7 +180,7 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
             />
             <span>Import Asset from AEM</span>
           </Button>
-          <HelpText>
+          <HelpText style={{ marginTop: '0.5rem' }}>
             Please make sure you are logged in to AEM before you click on the
             button above
           </HelpText>
