@@ -136,11 +136,18 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
   // reuse Contentful's editor components
   // -> https://www.contentful.com/developers/docs/extensibility/field-editors/
   return (
-    <div>
+    <div
+      className={css`
+        min-height: 150px;
+        display: flex;
+        justify-content: space-between;
+
+        flex-direction: column;
+      `}
+    >
       <div
         className={css`
           display: flex;
-          height: 100%;
           flex-direction: row;
         `}
       >
@@ -205,12 +212,12 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
             />
             <span>Import Asset from AEM</span>
           </Button>
-          <HelpText style={{ marginTop: '0.5rem' }}>
-            Please make sure you are logged in to AEM before you click on the
-            button above
-          </HelpText>
         </div>
       )}
+      <HelpText style={{ marginTop: '0.5rem' }}>
+        Please make sure you are logged in to AEM to add assets and see
+        thumbnails.
+      </HelpText>
     </div>
   );
 };
