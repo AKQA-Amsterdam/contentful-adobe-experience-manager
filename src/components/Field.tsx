@@ -130,7 +130,7 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
 
   // Check if any assets don't come from AEM
   useEffect(() => {
-    setHasInvalidAssets(assets.some((a: AEMAsset) => !a.img));
+    setHasInvalidAssets(assets && assets.some((a: AEMAsset) => !a.img));
   }, [assets]);
 
   const openDialog = useCallback(async (): Promise<void> => {
@@ -253,7 +253,7 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
               src={aemLogo}
               alt="Adobe Experience Manager"
             />
-            <span>Import Asset from AEM</span>
+            <span>Import from AEM</span>
           </Button>
         </div>
       )}
