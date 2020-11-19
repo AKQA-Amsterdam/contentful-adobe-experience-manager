@@ -3,10 +3,10 @@ import { AppState } from 'contentful-ui-extensions-sdk';
 import {
   Heading,
   Form,
-  Workbench,
   TextField,
   Paragraph,
   Card,
+  HelpText,
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import { validateDomainName, validatePath } from '../utils/validations';
@@ -137,7 +137,13 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     return (
       <>
         <div className={bannerStyles} />
-        <Workbench className={css({ margin: '50px' })}>
+        <div
+          className={css({
+            margin: '50px',
+            marginTop: '-150px',
+            marginBottom: '10px',
+          })}
+        >
           <Card
             className={css({
               width: '60vw',
@@ -180,7 +186,21 @@ export default class Config extends Component<ConfigProps, ConfigState> {
               />
             </Form>
           </Card>
-        </Workbench>
+        </div>
+        <HelpText className={css({ textAlign: 'center' })}>
+          Built with{' '}
+          <span role="img" aria-label="love">
+            ❤️
+          </span>{' '}
+          at{' '}
+          <a
+            href="https://github.com/akqa-amsterdam"
+            target="_blank"
+            rel="noreferrer"
+          >
+            AKQA Amsterdam
+          </a>
+        </HelpText>
       </>
     );
   }

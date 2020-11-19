@@ -132,8 +132,9 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
   const openDialog = useCallback(async (): Promise<void> => {
     const dialogData = await sdk.dialogs.openCurrentApp({
       title: 'Import from Adobe Experience Manager',
-      minHeight: 430,
+      minHeight: '80vh',
       allowHeightOverflow: true,
+      width: 'fullWidth',
       parameters: {
         mode,
       },

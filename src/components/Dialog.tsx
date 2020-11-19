@@ -9,7 +9,7 @@ import {
 } from './types';
 
 const iframeWrapperStyles = css`
-  height: 350px;
+  height: 85vh;
   border: 1px solid #c3cfd5;
   overflow: hidden;
   border-bottom-left-radius: 4px;
@@ -24,7 +24,7 @@ const iframeWrapperStyles = css`
 const iframeStyles = css`
   width: 100%;
   border: 0;
-  height: 350px;
+  height: 100%;
 
   position: absolute;
   top: 0;
