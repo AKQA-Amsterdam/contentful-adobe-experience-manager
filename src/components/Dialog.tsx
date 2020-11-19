@@ -43,12 +43,13 @@ const iframeStyles = css`
 const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
   const { configDomain } = sdk.parameters
     .installation as AppInstallationParameters;
-
-  const { mode } = sdk.parameters.instance as AppInstanceParameters;
+  const { mode } = sdk.parameters.invocation as AppInstanceParameters;
 
   const iframeUrl = useMemo(
     () =>
-      `${getValidURL(configDomain || '')}/aem/assetpicker.html?mode=${mode}`,
+      `${getValidURL(configDomain || '')}/aem/assetpicker.html?mode=${
+        mode || 'single'
+      }`,
     [configDomain, mode]
   );
 

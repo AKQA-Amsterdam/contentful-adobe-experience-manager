@@ -9,25 +9,29 @@ import {
 } from '@contentful/forma-36-react-components';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { css } from 'emotion';
-import { AppInstallationParameters } from './ConfigScreen';
+import {
+  AppInstallationParameters,
+  AppInstanceParameters,
+} from './ConfigScreen';
 import aemLogo from '../img/aem-logo.png';
 import { IframeActions } from './Dialog';
 
+export type AEMAsset = {
+  url: string;
+  type: string;
+  img?: string;
+};
+
 const assetStyles = css`
-  div {
-    width: auto;
-  }
-  img {
-    height: 50px;
-    width: auto;
-  }
+  width: 50px;
+  height: 50px;
 `;
 
 const roundButtonStyles = css`
   width: 20px;
   height: 20px;
   position: absolute;
-  top: 0;
+  top: -5px;
   right: -5px;
   border-radius: 100%;
 
@@ -65,6 +69,7 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
 
   const { configDomain } = sdk.parameters
     .installation as AppInstallationParameters;
+  const { mode } = sdk.parameters.instance as AppInstanceParameters;
 
   // Update the persistent value whenever the assets selected change
   useEffect(() => {
@@ -74,20 +79,44 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
     updateFieldValue();
   }, [assets, sdk]);
 
-  const clearAssets = useCallback(() => {
-    setAssets(null);
-  }, []);
+  const removeAsset = useCallback(
+    (url: string) => {
+      const filteeredAssets = assets.filter(
+        (asset: AEMAsset) => asset.url !== url
+      );
+      if (filteeredAssets.length) {
+        setAssets(filteeredAssets);
+      } else {
+        setAssets(null);
+      }
+    },
+    [assets]
+  );
+
+  const updateAssets = useCallback(
+    (newAssets: AEMAsset[]) => {
+      if (mode === 'multiple' && assets?.length) {
+        setAssets([...assets, ...newAssets]);
+      } else {
+        setAssets(newAssets);
+      }
+    },
+    [mode, assets]
+  );
 
   const openDialog = useCallback(async (): Promise<void> => {
     const dialogData = await sdk.dialogs.openCurrentApp({
       title: 'Import from Adobe Experience Manager',
       minHeight: 430,
       allowHeightOverflow: true,
+      parameters: {
+        mode,
+      },
     });
     if (dialogData && dialogData.action === IframeActions.success) {
-      setAssets(dialogData.data);
+      updateAssets(dialogData.data);
     }
-  }, [sdk]);
+  }, [sdk, updateAssets, mode]);
 
   if (!configDomain) {
     return (
@@ -107,50 +136,46 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
   // reuse Contentful's editor components
   // -> https://www.contentful.com/developers/docs/extensibility/field-editors/
   return (
-    <div
-      className={css`
-        display: flex;
-        height: 100%;
-      `}
-    >
-      {assets?.length && (
-        <div
-          className={css`
-            position: relative;
-            display: inline-block;
-            padding-top: 5px;
-          `}
-        >
-          <Card
+    <div>
+      <div
+        className={css`
+          display: flex;
+          height: 100%;
+          flex-direction: row;
+        `}
+      >
+        {assets?.map((a: AEMAsset) => (
+          <div
+            key={a.url}
             className={css`
-              height: 50px;
-              display: inline-block;
-              padding: 2px;
+              position: relative;
+              margin: 5px;
             `}
           >
-            <Asset
-              src={assets[0].img || assets[0].url}
-              title=""
-              className={assetStyles}
-            />
-          </Card>
-          <div>
-            {assets.length > 1 && (
-              <HelpText>+ {assets.length - 1} more assets</HelpText>
-            )}
-            <button
-              onClick={clearAssets}
-              className={roundButtonStyles}
-              title="Clear Assets"
+            <Card
+              className={css`
+                height: 50px;
+                display: inline-block;
+                padding: 2px;
+              `}
             >
-              <span>
-                <Icon icon="Close" size="small" />
-              </span>
-            </button>
+              <Asset src={a.img || a.url} title="" className={assetStyles} />
+            </Card>
+            <div>
+              <button
+                onClick={() => removeAsset(a.url)}
+                className={roundButtonStyles}
+                title="Clear Assets"
+              >
+                <span>
+                  <Icon icon="Close" size="small" />
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-      {!assets && (
+        ))}
+      </div>
+      {(!assets || mode === 'multiple') && (
         <div
           className={css`
             display: flex;
