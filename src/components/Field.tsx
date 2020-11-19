@@ -6,6 +6,7 @@ import {
   Icon,
   Button,
   EmptyState,
+  ValidationMessage,
 } from '@contentful/forma-36-react-components';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { css } from 'emotion';
@@ -25,6 +26,28 @@ export type AEMAsset = {
 const assetStyles = css`
   width: 50px;
   height: 50px;
+`;
+
+const warningStyles = css`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 100%;
+  overflow: hidden;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+  svg {
+    fill: #bf3045;
+    width: 15px;
+    height: 15px;
+    path:first-child {
+      fill: white;
+    }
+  }
 `;
 
 const roundButtonStyles = css`
@@ -66,6 +89,7 @@ interface FieldProps {
 
 const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
   const [assets, setAssets] = useState(sdk.field.getValue());
+  const [hasInvalidAssets, setHasInvalidAssets] = useState(false);
 
   const { configDomain } = sdk.parameters
     .installation as AppInstallationParameters;
@@ -103,6 +127,11 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
     },
     [mode, assets]
   );
+
+  // Check if any assets don't come from AEM
+  useEffect(() => {
+    setHasInvalidAssets(assets.some((a: AEMAsset) => !a.img));
+  }, [assets]);
 
   const openDialog = useCallback(async (): Promise<void> => {
     const dialogData = await sdk.dialogs.openCurrentApp({
@@ -179,9 +208,23 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
                 </span>
               </button>
             </div>
+            {!a.img && (
+              <span
+                title="This asset is not coming from AEM"
+                className={warningStyles}
+              >
+                <Icon icon="ErrorCircle" size="small" />
+              </span>
+            )}
           </div>
         ))}
       </div>
+      {hasInvalidAssets && (
+        <ValidationMessage>
+          Some of the selected assets are not coming from AEM. Please update
+          theem before launching your application.
+        </ValidationMessage>
+      )}
       {(!assets || mode === 'multiple') && (
         <div
           className={css`
