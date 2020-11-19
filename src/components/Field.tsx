@@ -226,36 +226,28 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
         </ValidationMessage>
       )}
       {(!assets || mode === 'multiple') && (
-        <div
+        <Button
+          onClick={openDialog}
+          buttonType="muted"
           className={css`
-            display: flex;
-            flex: 1;
-            flex-direction: column;
-            padding: 30px;
+            width: 192px;
+            & > span > span {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
           `}
         >
-          <Button
-            onClick={openDialog}
-            buttonType="muted"
+          <img
             className={css`
-              & > span > span {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
+              height: 35px;
+              margin-right: 10px;
             `}
-          >
-            <img
-              className={css`
-                height: 35px;
-                margin-right: 10px;
-              `}
-              src={aemLogo}
-              alt="Adobe Experience Manager"
-            />
-            <span>Import from AEM</span>
-          </Button>
-        </div>
+            src={aemLogo}
+            alt="Adobe Experience Manager"
+          />
+          <span>Import from AEM</span>
+        </Button>
       )}
       <HelpText style={{ marginTop: '0.5rem' }}>
         Please make sure you are logged in to AEM to add assets and see

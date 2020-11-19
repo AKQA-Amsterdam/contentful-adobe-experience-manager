@@ -9,7 +9,7 @@ import {
   Card,
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
-import validateUrl from '../utils/validateUrl';
+import validateDomainName from '../utils/validateDomainName';
 
 const bannerStyles = css`
   height: 300px;
@@ -108,7 +108,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
         },
       },
       () => {
-        if (!validateUrl(newValue)) {
+        if (!validateDomainName(newValue)) {
           this.setState({ validConfigDomain: false });
         } else {
           this.setState({ validConfigDomain: true });
@@ -122,6 +122,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
       parameters: { configDomain },
       validConfigDomain,
     } = this.state;
+
     return (
       <>
         <div className={bannerStyles} />
@@ -146,9 +147,9 @@ export default class Config extends Component<ConfigProps, ConfigState> {
                 id="configDomain"
                 name="configDomain"
                 labelText="AEM domain"
-                helpText="The domain name to interact with the Adobe ExperienceManager (without https:// at the start and without / at the end). Example: author-anon-stage-00-000-00.adobecqms.net"
+                helpText="The domain of your Adobe Experience Manager instance. Example: example.adobecqms.net"
                 validationMessage={
-                  (!validConfigDomain && 'Please enter a valid URL') ||
+                  (!validConfigDomain && 'Please enter a valid Domain Name') ||
                   undefined
                 }
                 value={configDomain}
