@@ -1,20 +1,12 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { Spinner, HelpText } from '@contentful/forma-36-react-components';
-import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { css } from 'emotion';
 import {
   AppInstallationParameters,
   AppInstanceParameters,
-} from './ConfigScreen';
-
-export enum IframeActions {
-  success,
-  cancel,
-}
-
-interface DialogProps {
-  sdk: DialogExtensionSDK;
-}
+  DialogProps,
+  IframeActions,
+} from './types';
 
 const iframeWrapperStyles = css`
   height: 350px;
@@ -40,14 +32,16 @@ const iframeStyles = css`
 `;
 
 const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
-  const { configDomain } = sdk.parameters
+  const { configDomain, rootPath } = sdk.parameters
     .installation as AppInstallationParameters;
   const { mode } = sdk.parameters.invocation as AppInstanceParameters;
 
   const iframeUrl = useMemo(
     () =>
-      `https://${configDomain}/aem/assetpicker.html?mode=${mode || 'single'}`,
-    [configDomain, mode]
+      `https://${configDomain}/aem/assetpicker.html?mode=${mode || 'single'}${
+        (rootPath !== '' && `&root=${rootPath}`) || null
+      }`,
+    [configDomain, rootPath, mode]
   );
 
   const listenForMessage = useCallback(
@@ -84,8 +78,15 @@ const Dialog: React.FC<DialogProps> = ({ sdk }: DialogProps) => {
         />
       </div>
       <HelpText style={{ marginTop: '0.5rem' }}>
-        If the AEM window is not loading above, please login to it on a new tab
-        and refresh this page.
+        If the AEM window is not loading above, please{' '}
+        <a
+          href={`https://${configDomain}/aem/assetpicker.html`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          login to AEM
+        </a>{' '}
+        on a new tab and refresh this page.
       </HelpText>
     </div>
   );

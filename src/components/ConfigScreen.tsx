@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppExtensionSDK, AppState } from 'contentful-ui-extensions-sdk';
+import { AppState } from 'contentful-ui-extensions-sdk';
 import {
   Heading,
   Form,
@@ -9,7 +9,9 @@ import {
   Card,
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
-import validateDomainName from '../utils/validateDomainName';
+import { validateDomainName, validatePath } from '../utils/validations';
+
+import { AppInstallationParameters, ConfigProps, ConfigState } from './types';
 
 const bannerStyles = css`
   height: 300px;
@@ -17,36 +19,16 @@ const bannerStyles = css`
   pointer-events: none;
 `;
 
-export enum AssetSelectorMode {
-  single = 'single',
-  multiple = 'multiple',
-}
-
-export interface AppInstallationParameters {
-  configDomain: string;
-}
-
-export interface AppInstanceParameters {
-  mode: AssetSelectorMode;
-}
-
-export interface ConfigProps {
-  sdk: AppExtensionSDK;
-}
-
-export interface ConfigState {
-  parameters: AppInstallationParameters;
-  validConfigDomain: boolean;
-}
-
 export default class Config extends Component<ConfigProps, ConfigState> {
   constructor(props: ConfigProps) {
     super(props);
     this.state = {
       parameters: {
         configDomain: '',
+        rootPath: '',
       },
       validConfigDomain: true,
+      validPath: true,
     };
 
     // `onConfigure` allows to configure a callback to be
@@ -65,6 +47,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
       {
         parameters: parameters || {
           configDomain: '',
+          rootPath: '',
         },
       },
       () => {
@@ -100,11 +83,15 @@ export default class Config extends Component<ConfigProps, ConfigState> {
 
   updateConfigDomain = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newValue = e.target.value;
+    const {
+      parameters: { rootPath },
+    } = this.state;
 
     this.setState(
       {
         parameters: {
           configDomain: newValue,
+          rootPath,
         },
       },
       () => {
@@ -117,10 +104,34 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     );
   };
 
-  render(): React.ReactNode {
+  updateRootPath = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const newValue = e.target.value;
     const {
       parameters: { configDomain },
+    } = this.state;
+
+    this.setState(
+      {
+        parameters: {
+          configDomain,
+          rootPath: newValue,
+        },
+      },
+      () => {
+        if (!validatePath(newValue)) {
+          this.setState({ validPath: false });
+        } else {
+          this.setState({ validPath: true });
+        }
+      }
+    );
+  };
+
+  render(): React.ReactNode {
+    const {
+      parameters: { configDomain, rootPath },
       validConfigDomain,
+      validPath,
     } = this.state;
 
     return (
@@ -155,6 +166,17 @@ export default class Config extends Component<ConfigProps, ConfigState> {
                 value={configDomain}
                 onChange={this.updateConfigDomain}
                 required
+              />
+              <TextField
+                id="rootPath"
+                name="rootPath"
+                labelText="Root path"
+                helpText="The path within AEM to set as the navigaton start within the Asset Selector. Please make sure the path is correct, as an invalid path will result  on the Asset selector displaying an error."
+                validationMessage={
+                  (!validPath && 'Please enter a valid path') || undefined
+                }
+                value={rootPath}
+                onChange={this.updateRootPath}
               />
             </Form>
           </Card>

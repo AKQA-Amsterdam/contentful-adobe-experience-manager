@@ -8,14 +8,14 @@ import {
   EmptyState,
   ValidationMessage,
 } from '@contentful/forma-36-react-components';
-import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { css } from 'emotion';
 import {
   AppInstallationParameters,
   AppInstanceParameters,
-} from './ConfigScreen';
+  FieldProps,
+  IframeActions,
+} from './types';
 import aemLogo from '../img/aem-logo.png';
-import { IframeActions } from './Dialog';
 
 export type AEMAsset = {
   url: string;
@@ -82,10 +82,6 @@ const roundButtonStyles = css`
     background: #fff;
   }
 `;
-
-interface FieldProps {
-  sdk: FieldExtensionSDK;
-}
 
 const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
   const [assets, setAssets] = useState(sdk.field.getValue());
@@ -250,8 +246,15 @@ const Field: React.FC<FieldProps> = ({ sdk }: FieldProps) => {
         </Button>
       )}
       <HelpText style={{ marginTop: '0.5rem' }}>
-        Please make sure you are logged in to AEM to add assets and see
-        thumbnails.
+        Please make sure you are{' '}
+        <a
+          href={`https://${configDomain}/aem/assetpicker.html`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          logged in to AEM
+        </a>{' '}
+        to add assets and see thumbnails.
       </HelpText>
     </div>
   );
